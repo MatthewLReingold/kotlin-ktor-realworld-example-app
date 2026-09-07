@@ -10,7 +10,6 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
-@Ignore
 class UserControllerTest {
     @Rule
     @JvmField
@@ -28,6 +27,7 @@ class UserControllerTest {
 //    }
 
     @Test
+    @Ignore("Existing failure; outside the registration baseline")
     fun `success login with email and password`() {
         val email = "success_login@valid_email.com"
         val password = "Test"
@@ -63,6 +63,7 @@ class UserControllerTest {
 //    }
 
     @Test
+    @Ignore("Existing failure; outside the registration baseline")
     fun `get current user by token`() {
         val email = "get_current@valid_email.com"
         val password = "Test"
@@ -77,6 +78,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Ignore("Existing failure; outside the registration baseline")
     fun `update user data`() {
         val email = "update_email@valid_email.com"
         val password = "Test"
