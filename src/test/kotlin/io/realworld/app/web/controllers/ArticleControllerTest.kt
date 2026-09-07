@@ -15,7 +15,7 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
-@Ignore
+//@Ignore
 class ArticleControllerTest {
     @Rule
     @JvmField
