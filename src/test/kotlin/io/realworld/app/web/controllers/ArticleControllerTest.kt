@@ -304,6 +304,26 @@ class PopularArticlesTest {
         assertEquals(expected, actual)
     }
 
+    @Test
+    fun `limit larger than the short list returns all articles sorted`() {
+        // Arrange: expect all three articles in popularity order.
+        val controller = ArticleController()
+        val expected = ArticlesDTO(
+            articles = listOf(
+                article("short-b", 9),
+                article("short-c", 6),
+                article("short-a", 3)
+            ),
+            articlesCount = 3
+        )
+
+        // Act: request up to ten articles without skipping any.
+        val actual = controller.popular(articles = shortArticles, limit = 10, offset = 0)
+
+        // Assert: a limit larger than the list still returns exactly the available articles.
+        assertEquals(expected, actual)
+    }
+
     // Keep required fields out of each fixture so favorite counts are easy to see.
     private fun article(slug: String, favoritesCount: Long): Article {
         return Article(
