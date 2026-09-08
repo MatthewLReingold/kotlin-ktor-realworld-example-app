@@ -18,8 +18,14 @@ First I figured out where the feature would be best suited, and then determined 
 
 While working with an agent I still followed Test Driven Development with one change. Instead of the usual test->code->test loop as done with traditional TDD, the best way to utilize the agent is to write all the tests first and make sure you understand every edge case. 
 
-Just like in typical TDD, the tests act as your verification, but having them all defined also acts as context for your agent to verify itself against. Once I was sure my tests had sufficient coverage of the problem, I allowed the agent to create the necessary function without further instruction, except to stay in the bounds of the tests and where the function needs to be written. Of course it was not allowed to change the tests after they were finalized.
+Just like in typical TDD, the tests act as your verification, but having them all defined also acts as context for your agent to verify itself against.
+
+Tests were designed both by me directly making them and directing the agent to make meaningful variations. Edgecases on the test focused on common failure areas such as handeling emptylists, pagination offsets and limits that would create an empty list, pramaters that lead to lists smaller than the given limit, and ensuring the lists of articles are sorted.
+
+I allowed the agent to make more of the http tests in bulk on its own as they were conceptually simpler, and I could ensure coverage with an easy review of those tests.
+
+ With the tests defined I allowed the agent to create the necessary function with limits to stay in the bounds of the tests and where the function needs to be written. It was not allowed to change the tests after they were finalized.
 
 One thing the agents have a tendency to do is to consider redundant tests, such as checking if default values are passed which is really just a test of the programming language and not a necessary test from a developer standpoint. So test writing needs to remain a very human involved part of development to ensure tests are relevant and useful.
 
-Because this repo was made with a lot of unfinished features beyond the scope of the project, regression testing, and contract testing were not concerns I took into account. I instead made my changes more isolated to avoid touching more of the repo and forcing scope creep. In a more realistic situation I would pay closer attention to these things, especially making sure that no downstream service, database, or application would have its requirements changed without at least communicating this need to the proper owners.
+Because this repo was made with a lot of unfinished features beyond the scope of the project, regression testing, and contract testing were not concerns I took into account. I made my changes as isolated as possible to avoid touching more of the repo and creating scope creep. In a more realistic situation I would pay closer attention to regression testing and contract testing. Making sure that no downstream service, database, or application would have its requirements changed without at least communicating this to the proper owners prevents many of the largest headaches in an eneterprise environment.
