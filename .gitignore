@@ -36,3 +36,7 @@ build/
 #System Files
 .DS_Store
 Thumbs.db
+
+#Agent files
+AGENTS.md
+TEST_BASELINE.md

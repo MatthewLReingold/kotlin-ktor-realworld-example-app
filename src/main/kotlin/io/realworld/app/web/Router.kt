@@ -42,6 +42,7 @@ fun Routing.profiles(profileController: ProfileController) {
 
 fun Routing.articles(articleController: ArticleController, commentController: CommentController) {
     route("articles") {
+        get("feed/popular") { articleController.popular(this.context) }
         authenticate {
             get("feed") { articleController.feed(this.context) }
             route("{slug}") {
