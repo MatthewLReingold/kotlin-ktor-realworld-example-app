@@ -353,7 +353,7 @@ class PopularArticlesTest {
         // Act: request 0 articles without skipping any.
         val actual = controller.popular(articles = longArticles, limit = 0, offset = 0)
 
-        // Assert: a limit smaller than the list returns exactly the top n articles.
+        // Assert: a limit 0 returns 0 articles.
         assertEquals(expected, actual)
     }
 
