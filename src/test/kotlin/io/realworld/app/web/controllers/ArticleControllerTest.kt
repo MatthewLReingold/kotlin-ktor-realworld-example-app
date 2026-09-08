@@ -238,3 +238,60 @@ class ArticleControllerTest {
         assertEquals(response.status, HttpStatus.SC_OK)
     }
 }
+
+class PopularArticlesTest {
+    // Test fixtures: ordinary Article objects, independent of the database and HTTP setup.
+    private val emptyArticles = emptyList<Article>()
+
+    // Bravo and delta tie: slug ascending should place bravo before delta.
+    private val unsortedArticles = listOf(
+        article("charlie", 2),
+        article("delta", 10),
+        article("alpha", 0),
+        article("bravo", 10),
+        article("echo", 5)
+    )
+
+    private val shortArticles = listOf(
+        article("short-a", 3),
+        article("short-b", 9),
+        article("short-c", 6)
+    )
+
+    private val longArticles = listOf(
+        article("long-a", 4),
+        article("long-b", 16),
+        article("long-c", 0),
+        article("long-d", 8),
+        article("long-e", 2),
+        article("long-f", 14),
+        article("long-g", 6),
+        article("long-h", 12)
+    )
+
+    @Test
+    fun `empty articles returns an empty list and zero count`() {
+        // Arrange: create the controller and describe the expected response.
+        val controller = ArticleController()
+        val expected = ArticlesDTO(articles = emptyList(), articlesCount = 0)
+
+        // Act: call the planned popular function with our empty input fixture.
+        val actual = controller.popular(articles = emptyArticles, limit = 20, offset = 0)
+
+        // Assert: compare the complete response, including the list and count.
+        assertEquals(expected, actual)
+    }
+
+    
+
+    // Keep required fields out of each fixture so favorite counts are easy to see.
+    private fun article(slug: String, favoritesCount: Long): Article {
+        return Article(
+            slug = slug,
+            title = "Article $slug",
+            description = "Description for $slug",
+            body = "Body for $slug",
+            favoritesCount = favoritesCount
+        )
+    }
+}
