@@ -4,6 +4,7 @@ import io.ktor.application.ApplicationCall
 import io.ktor.request.receive
 import io.realworld.app.domain.ArticleDTO
 import io.realworld.app.domain.ArticlesDTO
+import io.realworld.app.domain.Article
 
 class ArticleController {
 //class ArticleController(private val articleService: ArticleService) {
@@ -73,5 +74,9 @@ class ArticleController {
 //                ctx.json(ArticleDTO(this))
 //            }
         return ArticleDTO(null)
+    }
+
+    fun popular(articles: List<Article>, limit: Int = 20, offset: Int = 0): ArticlesDTO {
+       return ArticlesDTO(articles,articlesCount = articles.size)
     }
 }

@@ -282,7 +282,18 @@ class PopularArticlesTest {
         assertEquals(expected, actual)
     }
 
-    
+    @Test
+    fun `when given unsorted list, return sorted`() {
+        // Arrange: create the controller and describe the expected response.
+        val controller = ArticleController()
+        val expected = ArticlesDTO(articles = unsortedArticles, articlesCount = 5)
+
+        // Act: call the planned popular function with our empty input fixture.
+        val actual = controller.popular(articles = emptyArticles, limit = 20, offset = 0)
+
+        // Assert: compare the complete response, including the list and count.
+        assertEquals(expected, actual)
+    }
 
     // Keep required fields out of each fixture so favorite counts are easy to see.
     private fun article(slug: String, favoritesCount: Long): Article {
