@@ -283,13 +283,22 @@ class PopularArticlesTest {
     }
 
     @Test
-    fun `when given unsorted list, return sorted`() {
-        // Arrange: create the controller and describe the expected response.
+    fun `articles are ordered by favorites descending then slug ascending`() {
+        // Arrange: specify the expected order explicitly, including the tie at 10 favorites.
         val controller = ArticleController()
-        val expected = ArticlesDTO(articles = unsortedArticles, articlesCount = 5)
+        val expected = ArticlesDTO(
+            articles = listOf(
+                article("bravo", 10),
+                article("delta", 10),
+                article("echo", 5),
+                article("charlie", 2),
+                article("alpha", 0)
+            ),
+            articlesCount = 5
+        )
 
-        // Act: call the planned popular function with our empty input fixture.
-        val actual = controller.popular(articles = emptyArticles, limit = 20, offset = 0)
+        // Act: give the real function the unsorted input fixture.
+        val actual = controller.popular(articles = unsortedArticles, limit = 20, offset = 0)
 
         // Assert: compare the complete response, including the list and count.
         assertEquals(expected, actual)
