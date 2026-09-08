@@ -6,7 +6,10 @@ import io.realworld.app.domain.ArticleDTO
 import io.realworld.app.domain.ArticlesDTO
 import io.realworld.app.domain.Article
 
-class ArticleController {
+class ArticleController(
+    // HTTP tests supply a fixed list; production retrieval will be connected with the endpoint.
+    private val loadArticles: () -> List<Article> = { error("Article retrieval is not configured") }
+) {
 //class ArticleController(private val articleService: ArticleService) {
 
     fun findBy(ctx: ApplicationCall): ArticlesDTO {

@@ -1,9 +1,25 @@
 package io.realworld.app.web.controllers
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.application.install
+import io.ktor.auth.Authentication
+import io.ktor.auth.basic
+import io.ktor.features.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.jackson.jackson
+import io.ktor.routing.Routing
+import io.ktor.server.testing.TestApplicationResponse
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.withTestApplication
 import io.realworld.app.domain.Article
 import io.realworld.app.domain.ArticleDTO
 import io.realworld.app.domain.ArticlesDTO
 import io.realworld.app.domain.ProfileDTO
+import io.realworld.app.domain.User
+import io.realworld.app.web.articles
 import io.realworld.app.web.rules.AppRule
 import io.realworld.app.web.util.HttpUtil
 import org.apache.http.HttpStatus
@@ -14,6 +30,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import java.util.Date
 
 @Ignore
 class ArticleControllerTest {
@@ -237,6 +254,129 @@ class ArticleControllerTest {
 
         assertEquals(response.status, HttpStatus.SC_OK)
     }
+}
+
+class PopularArticlesHttpTest {
+    private val mapper = jacksonObjectMapper()
+    private val alpha = article("alpha", 0, "alice")
+    private val bravo = article("bravo", 10, "bob")
+    private val charlie = article("charlie", 2, "carol")
+    private val delta = article("delta", 10, "dana")
+    private val echo = article("echo", 5, "erin")
+    private val unsortedArticles = listOf(charlie, delta, alpha, bravo, echo)
+
+    @Test
+    fun `public popular route sorts before pagination and preserves total count`() {
+        // No Authorization header: the real router must expose this endpoint publicly.
+        assertPage("limit=2&offset=1", ArticlesDTO(listOf(delta, echo), 5))
+    }
+
+    @Test
+    fun `public popular route includes all authors in popularity order`() {
+        assertPage("limit=10&offset=0", ArticlesDTO(listOf(bravo, delta, echo, charlie, alpha), 5))
+    }
+
+    @Test
+    fun `zero limit is accepted and preserves total count`() {
+        assertPage("limit=0&offset=0", ArticlesDTO(emptyList(), 5))
+    }
+
+    @Test
+    fun `largest Int limit is accepted`() {
+        assertPage("limit=2147483647&offset=0", ArticlesDTO(listOf(bravo, delta, echo, charlie, alpha), 5))
+    }
+
+    @Test
+    fun `largest Int offset is accepted and preserves total count`() {
+        assertPage("limit=2&offset=2147483647", ArticlesDTO(emptyList(), 5))
+    }
+
+    @Test
+    fun `negative limit returns bad request`() = assertBadRequest("limit=-1&offset=0")
+
+    @Test
+    fun `fractional limit returns bad request`() = assertBadRequest("limit=1.5&offset=0")
+
+    @Test
+    fun `whole number with decimal point limit returns bad request`() = assertBadRequest("limit=3.0&offset=0")
+
+    @Test
+    fun `nonnumeric limit returns bad request`() = assertBadRequest("limit=abc&offset=0")
+
+    @Test
+    fun `empty supplied limit returns bad request`() = assertBadRequest("limit=&offset=0")
+
+    @Test
+    fun `overflowing limit returns bad request`() = assertBadRequest("limit=2147483648&offset=0")
+
+    @Test
+    fun `negative offset returns bad request`() = assertBadRequest("limit=2&offset=-1")
+
+    @Test
+    fun `fractional offset returns bad request`() = assertBadRequest("limit=2&offset=1.5")
+
+    @Test
+    fun `whole number with decimal point offset returns bad request`() = assertBadRequest("limit=2&offset=3.0")
+
+    @Test
+    fun `nonnumeric offset returns bad request`() = assertBadRequest("limit=2&offset=abc")
+
+    @Test
+    fun `empty supplied offset returns bad request`() = assertBadRequest("limit=2&offset=")
+
+    @Test
+    fun `overflowing offset returns bad request`() = assertBadRequest("limit=2&offset=2147483648")
+
+    private fun assertPage(query: String, expected: ArticlesDTO) {
+        request(query) { response ->
+            assertEquals(HttpStatusCode.OK, response.status())
+            val contentType = response.headers[HttpHeaders.ContentType]
+            assertNotNull("Expected a JSON Content-Type", contentType)
+            assertEquals(ContentType.Application.Json, ContentType.parse(contentType!!).withoutParameters())
+            assertNotNull("Expected a JSON response body", response.content)
+            // Tree equality checks every field, including unexpected or missing fields,
+            // while allowing JSON object properties to appear in any order.
+            assertEquals(mapper.readTree(mapper.writeValueAsString(expected)), mapper.readTree(response.content!!))
+        }
+    }
+
+    private fun assertBadRequest(query: String) {
+        request(query) { response ->
+            assertEquals("Query: $query", HttpStatusCode.BadRequest, response.status())
+        }
+    }
+
+    private fun request(query: String, check: (TestApplicationResponse) -> Unit) {
+        withTestApplication({
+            install(ContentNegotiation) { jackson {} }
+            install(Authentication) {
+                // Reject authentication so accidental nesting inside authenticate fails.
+                basic { validate { null } }
+            }
+            install(Routing) {
+                articles(ArticleController(loadArticles = { unsortedArticles }), CommentController())
+            }
+        }) {
+            // Use the production route registration, with no database or registration setup.
+            val call = handleRequest(HttpMethod.Get, "/articles/feed/popular?$query") {
+                addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
+            }
+            check(call.response)
+        }
+    }
+
+    private fun article(slug: String, favoritesCount: Long, author: String) = Article(
+        slug = slug,
+        title = "Article $slug",
+        description = "Description for $slug",
+        body = "Body for $slug",
+        tagList = listOf("popular", slug),
+        createdAt = Date(1_700_000_000_000L),
+        updatedAt = Date(1_700_000_060_000L),
+        favorited = false,
+        favoritesCount = favoritesCount,
+        author = User(email = "$author@example.com", username = author, bio = "Bio for $author", image = "image-$author")
+    )
 }
 
 class PopularArticlesTest {

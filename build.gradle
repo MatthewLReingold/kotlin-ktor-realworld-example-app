@@ -46,6 +46,10 @@ dependencies {
     implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
 
     testImplementation "junit:junit:$junit_version"
+    testImplementation("io.ktor:ktor-server-test-host:$ktor_version") {
+        // handleRequest uses the server harness, not Ktor's client test suite.
+        exclude group: "io.ktor", module: "ktor-client-tests-jvm"
+    }
     testImplementation "com.mashape.unirest:unirest-java:$unirest_version"
 }
 
