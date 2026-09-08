@@ -8,8 +8,8 @@ data class UserDTO(val user: User? = null) {
         require(
             user != null &&
                 user.email.isEmailValid() &&
-                !user.password.isNullOrBlank() &&
-                !user.username.isNullOrBlank()
+                user.password.isNullOrBlank() &&
+                user.username.isNullOrBlank()
         ) { "User is invalid." }
         return user
     }
