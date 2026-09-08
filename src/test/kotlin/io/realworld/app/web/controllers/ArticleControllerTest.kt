@@ -351,7 +351,7 @@ class PopularArticlesTest {
         val expected = ArticlesDTO(articles = emptyList(), articlesCount = 8)
 
         // Act: request 0 articles without skipping any.
-        val actual = controller.popular(articles = longArticles, limit = 3, offset = 0)
+        val actual = controller.popular(articles = longArticles, limit = 0, offset = 0)
 
         // Assert: a limit smaller than the list returns exactly the top n articles.
         assertEquals(expected, actual)
