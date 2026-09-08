@@ -1,4 +1,8 @@
 ### AGENT WORKLOG
+
+Video walk through
+https://youtu.be/5wW3pZ2pMQw
+
 # Agents and Harness Used
 Harness: Codex for Visual Studio Code
 
