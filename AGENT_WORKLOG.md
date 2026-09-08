@@ -4,6 +4,8 @@ Harness: Codex for Visual Studio Code
 
 Model: GPT-6 Astra
 
+I chose to use Codex over Claude as Claude models have become very verbose in their outputs as of late. This makes their generated code and comments more annoying to deal with, and also costs me, the user, more.
+
 # Discussion on Use
 
 The first thing I did was have the LLM explain the repo and its tech stack to me. I have not worked with Kotlin before and needed to mentally map the repo to my knowledge of other technology stacks to ensure I understood what I was working with.
@@ -20,4 +22,4 @@ Just like in typical TDD, the tests act as your verification, but having them al
 
 One thing the agents have a tendency to do is to consider redundant tests, such as checking if default values are passed which is really just a test of the programming language and not a necessary test from a developer standpoint. So test writing needs to remain a very human involved part of development to ensure tests are relevant and useful.
 
-I chose to use Codex over Claude as Claude models have become very verbose in their outputs as of late. This makes their generated code and comments more annoying to deal with, and also costs me, the user, more.
+Because this repo was made with a lot of unfinished features beyond the scope of the project, regression testing, and contract testing were not concerns I took into account. I instead made my changes more isolated to avoid touching more of the repo and forcing scope creep. In a more realistic situation I would pay closer attention to these things, especially making sure that no downstream service, database, or application would have its requirements changed without at least communicating this need to the proper owners.
