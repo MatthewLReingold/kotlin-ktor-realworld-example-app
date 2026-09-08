@@ -1,13 +1,15 @@
 package io.realworld.app.web.controllers
 
 import io.ktor.application.ApplicationCall
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
+import io.ktor.response.respond
 import io.realworld.app.domain.ArticleDTO
 import io.realworld.app.domain.ArticlesDTO
 import io.realworld.app.domain.Article
 
 class ArticleController(
-    // HTTP tests supply a fixed list; production retrieval will be connected with the endpoint.
+    // The caller supplies article retrieval; HTTP tests use a fixed list.
     private val loadArticles: () -> List<Article> = { error("Article retrieval is not configured") }
 ) {
 //class ArticleController(private val articleService: ArticleService) {
@@ -79,7 +81,30 @@ class ArticleController(
         return ArticleDTO(null)
     }
 
+    suspend fun popular(ctx: ApplicationCall) {
+        val limit = paginationParameter(ctx.request.queryParameters["limit"], 20)
+        val offset = paginationParameter(ctx.request.queryParameters["offset"], 0)
+        if (limit == null || offset == null) {
+            ctx.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("errors" to mapOf("pagination" to listOf("limit and offset must be integers between 0 and 2147483647")))
+            )
+            return
+        }
+
+        ctx.respond(popular(loadArticles(), limit, offset))
+    }
+
+    private fun paginationParameter(value: String?, defaultValue: Int): Int? {
+        return if (value == null) defaultValue else value.toIntOrNull()?.takeIf { it >= 0 }
+    }
+
     fun popular(articles: List<Article>, limit: Int = 20, offset: Int = 0): ArticlesDTO {
-       return ArticlesDTO(articles,articlesCount = articles.size)
+        require(limit >= 0 && offset >= 0) { "limit and offset must be nonnegative" }
+        val page = articles
+            .sortedWith(compareByDescending<Article> { it.favoritesCount }.thenBy { it.slug })
+            .drop(offset)
+            .take(limit)
+        return ArticlesDTO(page, articlesCount = articles.size)
     }
 }
