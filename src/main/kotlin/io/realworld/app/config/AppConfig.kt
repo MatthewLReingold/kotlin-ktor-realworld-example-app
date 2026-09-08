@@ -80,8 +80,7 @@ fun Application.mainModule() {
         }
     }
     install(StatusPages) {
-        exception(Exception::class.java) { cause ->
-            this@mainModule.environment.log.error("Unhandled request exception", cause)
+        exception(Exception::class.java) {
             val errorResponse = ErrorResponse(mapOf("error" to listOf("detail", this.toString())))
             context.respond(
                 HttpStatusCode.InternalServerError, errorResponse
