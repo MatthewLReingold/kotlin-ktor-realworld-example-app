@@ -345,6 +345,19 @@ class PopularArticlesTest {
     }
 
     @Test
+    fun `limit is 0 returns empty list and preserves articlesCount`() {
+        // Arrange: expect 0 articles with articlesCount = 8.
+        val controller = ArticleController()
+        val expected = ArticlesDTO(articles = emptyList(), articlesCount = 8)
+
+        // Act: request 0 articles without skipping any.
+        val actual = controller.popular(articles = longArticles, limit = 3, offset = 0)
+
+        // Assert: a limit smaller than the list returns exactly the top n articles.
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `offset skips three sorted articles and limit returns the next four`() {
         // Arrange: expect positions 3 through 6 after sorting, counting from zero.
         val controller = ArticleController()
@@ -391,6 +404,17 @@ class PopularArticlesTest {
 
         // Skip beyond all eight articles.
         val actual = controller.popular(articles = longArticles, limit = 3, offset = 10)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `offset equals list size returns an empty list and preserves total count`() {
+        val controller = ArticleController()
+        val expected = ArticlesDTO(articles = emptyList(), articlesCount = 8)
+
+        // Skip beyond all eight articles.
+        val actual = controller.popular(articles = longArticles, limit = 3, offset = 8)
 
         assertEquals(expected, actual)
     }
