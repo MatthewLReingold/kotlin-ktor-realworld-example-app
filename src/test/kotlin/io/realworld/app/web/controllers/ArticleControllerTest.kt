@@ -324,7 +324,7 @@ class PopularArticlesTest {
         assertEquals(expected, actual)
     }
 
-     @Test
+    @Test
     fun `limit smaller than the long list returns limited articles sorted`() {
         // Arrange: expect top three articles in popularity order.
         val controller = ArticleController()
@@ -341,6 +341,57 @@ class PopularArticlesTest {
         val actual = controller.popular(articles = longArticles, limit = 3, offset = 0)
 
         // Assert: a limit smaller than the list returns exactly the top n articles.
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `offset skips three sorted articles and limit returns the next four`() {
+        // Arrange: expect positions 3 through 6 after sorting, counting from zero.
+        val controller = ArticleController()
+        val expected = ArticlesDTO(
+            articles = listOf(
+                article("long-d", 8),
+                article("long-g", 6),
+                article("long-a", 4),
+                article("long-e", 2)
+            ),
+            articlesCount = 8
+        )
+
+        // Act: skip the top three articles, then request up to four.
+        val actual = controller.popular(articles = longArticles, limit = 4, offset = 3)
+
+        // Assert: return the correct page while retaining the total count.
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `offset leaves fewer articles than limit and returns the remaining articles`() {
+        // Arrange: only positions 6 and 7 remain in the sorted list.
+        val controller = ArticleController()
+        val expected = ArticlesDTO(
+            articles = listOf(
+                article("long-e", 2),
+                article("long-c", 0)
+            ),
+            articlesCount = 8
+        )
+
+        // Act: skip six articles and request up to three.
+        val actual = controller.popular(articles = longArticles, limit = 3, offset = 6)
+
+        // Assert: return the final two articles and the original total count.
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `offset beyond the list returns an empty list and preserves total count`() {
+        val controller = ArticleController()
+        val expected = ArticlesDTO(articles = emptyList(), articlesCount = 8)
+
+        // Skip beyond all eight articles.
+        val actual = controller.popular(articles = longArticles, limit = 3, offset = 10)
+
         assertEquals(expected, actual)
     }
 
